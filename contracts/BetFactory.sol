@@ -4,34 +4,51 @@ pragma solidity 0.8.11;
 import './Bet.sol';
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-
 contract BetFactory is KeeperCompatible {
     address private owner = msg.sender;
     Bet[] public bets;
+    uint public numberOfBets;
+    mapping(uint256 => Bet) public betsMap;
 
     receive() external payable {}
 
-    function createBet(string memory _symbol, uint _line, uint _spread, uint _maxBetSize, uint _multiplier) public {
-        Bet bet = new Bet(_symbol, _line, _spread, _maxBetSize, _multiplier);
-        bets.push(bet);
+    function createBet(string memory _symbol, int _line, int _spread, uint _maxBetSize, uint _multiplier, uint _expiration) public {
+        Bet _bet = new Bet(_symbol, _line, _spread, _maxBetSize, _multiplier, _expiration);
+        bets.push(_bet);
+        betsMap[numberOfBets] = _bet;
+        numberOfBets++;
     }
 
-    function checkIfBetsHaveExpired() public {
-        for (uint8 i = 0; i < bets.length; i++) {
-            Bet currentBet = bets[i];
+    function getAllBets() public view returns (Bet[] memory) {
+        return bets;
+    }
+
+    function resolveExistingBets() public {
+        uint _betsLength = bets.length;
+        for (uint8 _i = 0; _i < _betsLength; _i++) {
+            Bet currentBet = bets[_i];
             if (block.timestamp > currentBet.expiration()) {
                 currentBet.resolveBet();
+                removeFromBets(_i);
+                numberOfBets--;
+                _betsLength--;
+                _i--;
             }
         }
     }
 
     function checkUpkeep(
         bytes calldata /*checkData */
-    ) external override returns (bool upkeepNeeded, bytes memory) {
-        upkeepNeeded = true;
+    ) external override view returns (bool upkeepNeeded, bytes memory) {
+        return (bets.length > 0, bytes(''));
     }
 
     function performUpkeep(bytes calldata) external override {
-        return true;
+        resolveExistingBets();
+    }
+
+    function removeFromBets(uint index) internal {
+        bets[index] = bets[bets.length - 1];
+        bets.pop();
     }
 }

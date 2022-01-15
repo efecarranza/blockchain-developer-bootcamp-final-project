@@ -12,7 +12,7 @@ contract BetFactory is KeeperCompatible {
 
     receive() external payable {}
 
-    function createBet(string memory _symbol, int _line, int _spread, uint _maxBetSize, uint _multiplier, uint _expiration) public {
+    function createBet(string memory _symbol, int _line, int _spread, int _maxBetSize, int _multiplier, uint _expiration) public {
         Bet _bet = new Bet(_symbol, _line, _spread, _maxBetSize, _multiplier, _expiration);
         bets.push(_bet);
         betsMap[numberOfBets] = _bet;
@@ -21,6 +21,11 @@ contract BetFactory is KeeperCompatible {
 
     function getAllBets() public view returns (Bet[] memory) {
         return bets;
+    }
+
+    function getBetDetails(uint index) public view returns (string memory, int, int, uint) {
+        Bet bet = betsMap[index];
+        return bet.getBetDetails();
     }
 
     function resolveExistingBets() public {

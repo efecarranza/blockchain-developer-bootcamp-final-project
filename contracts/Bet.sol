@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
 contract Bet {
     event LogUserPlacedBet(address _address, SideOfBet _side);
     event LogUserCancelledBet(address _address, SideOfBet _side);
     event LogPayoutToUser(address _payout, uint _amount);
 
     enum SideOfBet { OVER, UNDER, NONE }
+
+    AggregatorV3Interface internal priceFeed;
 
     struct PlacedBet {
         address bettor;
@@ -18,23 +22,26 @@ contract Bet {
     address payable public owner = payable(msg.sender);
     bool public isLive = true;
     string public symbol;
-    uint public line;
-    uint public spread;
-    uint public maxBetSize;
+    int public line;
+    int public spread;
+    int public maxBetSize;
     uint public expiration;
-    uint public payoutMultiplier; // Divide by 10 for float
+    int public payoutMultiplier; // Divide by 10 for float
     mapping (address => PlacedBet) public betsByUser;
     uint8 public numberOfBets = 0;
     uint public contractBalance;
     address[] public usersBetting;
 
-    constructor(string memory _symbol, uint _line, uint _spread, uint _maxBetSize, uint _multiplier, uint _expiration) {
+    constructor(string memory _symbol, int _line, int _spread, int _maxBetSize, int _multiplier, uint _expiration) {
         symbol = _symbol;
-        line = _line;
-        spread = _spread;
+        line = _line * 10**18;
+        spread = _spread * 10*18;
         maxBetSize = _maxBetSize * 10**18;
         payoutMultiplier = _multiplier;
         expiration = _expiration;
+        priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
+        // Rinkeby: 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
+        // Kovan:0x9326BFA02ADD2366b30bacB125260Af641031331
     }
 
     function cancelBet() public {
@@ -80,6 +87,10 @@ contract Bet {
         return usersBetting;
     }
 
+    function getBetDetails() public view returns (string memory, int, int, uint) {
+        return (symbol, line, spread, expiration);
+    }
+
     function getSideOfBetFromString(string memory _side) internal pure returns (SideOfBet sideOfBet) {
         if (keccak256(abi.encodePacked((_side))) == keccak256(abi.encodePacked(("over")))) {
             return SideOfBet.OVER;
@@ -90,20 +101,21 @@ contract Bet {
         require(false, "Side of bet must be either: 'over' or 'under'.");
     }
 
-    function getCurrentPrice() public pure returns (uint) { // change to view as it won't be pure
-        return 3500;
+    function getCurrentPrice() public view returns (int) { // change to view as it won't be pure
+        (, int price, , , ) = priceFeed.latestRoundData();
+        return price;
+        // return 3500; // Test number
     }
 
     function kill(uint _outstandingBets) public {
         require(_outstandingBets == 0, "Contract still has unresolved bets");
         (bool success, ) = owner.call{value: contractBalance}("");
         require(success, "Failed to send Ether");
-        selfdestruct(owner);
     }
 
     function resolveBet() public {
         require(msg.sender == owner, "Only contract owner can resolve bet.");
-        uint currentPrice = getCurrentPrice();
+        int currentPrice = getCurrentPrice() * (10**10);
         SideOfBet winningSide = SideOfBet.NONE;
 
         if (currentPrice > line + spread) {
@@ -127,7 +139,7 @@ contract Bet {
     }
 
     function payout(address _bettor, uint _betSize) internal {
-        uint toWithdraw = _betSize * payoutMultiplier / 10;
+        uint toWithdraw = uint(_betSize) * uint(payoutMultiplier) / 10;
         require(contractBalance >= toWithdraw, "Insufficient funds to withdraw.");
 
         contractBalance -= toWithdraw;

@@ -4,87 +4,64 @@ import { ThirdwebSDK } from "@3rdweb/sdk";
 import { UnsupportedChainIdError } from "@web3-react/core";
 import { ethers } from 'ethers';
 import "./App.css";
-import BookingContract from './contracts/Booking.json';
+import BetContract from './contracts/Bet.json';
+import BetFactoryContract from './contracts/BetFactory.json';
 
 // Deployed to Kovan: 0x966494b6e7920530c6F093cC37e50488466839DC
 // Timestamp already passed: 1642270684
 
 const App = () => {
-  const sdk = new ThirdwebSDK("rinkeby");
+  const sdk = new ThirdwebSDK("kovan");
   const { connectWallet, address, error, provider } = useWeb3();
   const signer = provider ? provider.getSigner() : undefined;
-  const [isBooking, setIsBooking] = useState(false);
-  const [rooms, setRooms] = useState([]);
-  const [timeSlots, setTimeSlots] = useState([]);
-  const [isMember, setIsMember] = useState(false);
+  const [bets, setBets] = useState([]);
 
-  const cokeModule = sdk.getBundleDropModule("0xB0403DB21E82587D3E40341577bcA250C9F7bE82");
-  const contractAddress = "0x4820f9A4261aad5dC60153B3d2d53C3628E5909E";
-  let bookingContract;
+  const contractAddress = "0x11E3ce35E7Da7B135874bFAD00491160880BBa06";
+  let betFactoryContract;
 
   if (signer) {
-    bookingContract = new ethers.Contract(
+    betFactoryContract = new ethers.Contract(
       contractAddress,
-      BookingContract.abi,
+      BetFactoryContract.abi,
       signer
     );
   }
 
-  async function getTimeData(roomId, times) {
-    const timeSlots = await Promise.all(times.map(async (time) => {
-      const bookingId = roomId + '-' + time;
-      const booking = await bookingContract.checkAvailability(bookingId);
-      return { 'available': booking[0], 'address': booking[1], 'time': time, 'roomId': roomId };
-    }));
-    return timeSlots;
-  } 
+  const getBets = useCallback(async () => {
+    const allBets = await betFactoryContract.getAllBets();
+    const betDetails = await Promise.all(
+      allBets.map((element, index) => {
+          return betFactoryContract.getBetDetails(index);
+      })
+    );
+    setBets(betDetails);
+  }, [provider, betFactoryContract]);
 
-  async function listTimes(roomId) {
-    try {
-      const times = await bookingContract.listTimes();
-      const timeSlots = await getTimeData(roomId, times);
-      setTimeSlots(timeSlots);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const viewBet = () => {
+    console.log('clicked view bet');
+  };
 
   useEffect(() => {
-    if (!address) {
+    if (!signer) {
       return;
     }
-    
-    cokeModule
-    .balanceOf(address, "0")
-    .then((balance) => {
-      if (balance.gt(0)) {
-        setIsMember(true);
-      } else {
-        setIsMember(false);
-      }
-    })
-    .catch((error) => {
-      setIsMember(false);
-    });
-  }, [address, cokeModule]);
+
+    getBets();
+  }, [provider]);
 
   useMemo(() => {
     if (!signer) {
       return;
     }
 
-    bookingContract.listRooms()
-    .then((rs) => {
-      setRooms(rs);
-    });
   }, [provider]);
 
   if (error instanceof UnsupportedChainIdError ) {
     return (
       <div className="unsupported-network">
-        <h2>Please connect to Rinkeby</h2>
+        <h2>Please connect to Kovan</h2>
         <p>
-          The room booking service is only available in the Rinkeby network for now, please switch networks
+          SportsBetX is only available in the Kovan network for now, please switch networks
           in your connected wallet.
         </p>
       </div>
@@ -104,52 +81,32 @@ const App = () => {
 
   return (
   <div className="member-page">
-    <h1>It's COLA Day</h1>
+    <h1>SportsBetX</h1>
     <div>
       <div>
-          <h2>Room List</h2>
+          <h2>Existing Bets</h2>
           <table className="card">
             <thead>
               <tr>
-                <th>Room #</th>
+                <th>Symbol</th>
+                <th>Line</th>
+                <th>Spread</th>
+                <th>Expiration</th>
+                <th>View</th>
               </tr>
             </thead>
             <tbody>
-              {rooms.map((room) => {
+              {bets.map((bet, i) => {
                 return (
-                  <tr key={room}>
+                  <tr key={i}>
+                    <td>{bet[0]}</td>
+                    <td>{bet[1].toString()}</td>
+                    <td></td>
+                    <td></td>
                     <td>
-                    <button className="room-item" value={room} onClick={() => listTimes(room)}>
-                      {room}
+                    <button className="room-item" value={bet} onClick={() => viewBet()}>
+                      View
                     </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div id="availableSlotsDiv">
-          <h2>Available Times</h2>
-          <table className="card">
-            <thead>
-              <tr>
-                <th>Time Slot</th>
-              </tr>
-            </thead>
-            <tbody id="availabletimesTBody">
-              {timeSlots.map((slot) => {
-                return (
-                  <tr key={slot.time}>
-                    <td>
-                      <TimeSlot
-                        roomId={slot.roomId}
-                        timeSlot={slot.time}
-                        address={slot.address}
-                        available={slot.available}
-                        requesterAddress={address}
-                        bookingContract={bookingContract}
-                      />
                     </td>
                   </tr>
                 );

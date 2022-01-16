@@ -28,7 +28,6 @@ const App = () => {
   }
 
   const formatDate = (date) => {
-    console.log(date);
     return new Date(date*1000).toLocaleDateString("en-US");
   };
 

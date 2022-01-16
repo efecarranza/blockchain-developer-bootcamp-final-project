@@ -27,6 +27,11 @@ const App = () => {
     );
   }
 
+  const formatDate = (date) => {
+    console.log(date);
+    return new Date(date*1000).toLocaleDateString("en-US");
+  };
+
   const getBets = useCallback(async () => {
     const allBets = await betFactoryContract.getAllBets();
     const betDetails = await Promise.all(
@@ -83,16 +88,16 @@ const App = () => {
   <div className="member-page">
     <h1>SportsBetX</h1>
     <div>
-      <div>
+      <div style={{ width: "100%" }}>
           <h2>Existing Bets</h2>
           <table className="card">
             <thead>
-              <tr>
+              <tr className="center-text">
                 <th>Symbol</th>
                 <th>Line</th>
                 <th>Spread</th>
                 <th>Expiration</th>
-                <th>View</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -100,12 +105,12 @@ const App = () => {
                 return (
                   <tr key={i}>
                     <td>{bet[0]}</td>
-                    <td>{bet[1].toString()}</td>
-                    <td></td>
-                    <td></td>
+                    <td>{ethers.utils.formatEther(bet[1].toString())}</td>
+                    <td>50</td>
+                    <td>{formatDate(bet[3].toString())}</td>
                     <td>
                     <button className="room-item" value={bet} onClick={() => viewBet()}>
-                      View
+                      Bet
                     </button>
                     </td>
                   </tr>

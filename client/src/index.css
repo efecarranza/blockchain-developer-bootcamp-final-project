@@ -25,7 +25,7 @@ h1 {
 
 .room-item {
   border: 1px solid black;
-  margin: 4px;
+  margin: 0 4px;
   border-radius: 1rem;
   color: #fff;
   background-color: #000;
@@ -71,7 +71,6 @@ h1 {
   display: flex;
   flex-direction: row;
   width: 100%;
-  text-align: left;
   gap: 2rem;
 }
 .member-page > div > div {
@@ -134,7 +133,7 @@ button {
   padding: 1.2rem 2rem;
   text-transform: uppercase;
   border-radius: 3rem;
-  font-size: 1.2rem;
+  font-size: 0.6rem;
 }
 
 button:hover {
@@ -153,4 +152,8 @@ button:disabled {
 .cancel-booking {
   background-color: #D11A2A;
   margin-left: 10px;
+}
+
+.center-text {
+	text-align: center;
 }

@@ -11,13 +11,11 @@ const connectors = {
 };
 
 ReactDOM.render(
-  <React.StrictMode>
     <ThirdwebWeb3Provider
       connectors={connectors}
       supportedChainIds={supportedChainIds}
     >
       <App />
-    </ThirdwebWeb3Provider>
-  </React.StrictMode>,
+    </ThirdwebWeb3Provider>,
   document.getElementById("root")
 );

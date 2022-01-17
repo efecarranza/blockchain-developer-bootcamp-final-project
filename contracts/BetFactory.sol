@@ -12,7 +12,7 @@ contract BetFactory is KeeperCompatible {
     /*
     / Events - Publicize events to external listeners.
     */
-    event LogBetCreatedFromFactory(string, int line, int spread);
+    event LogBetCreatedFromFactory(string symbol, int line, int spread);
 
     /// Storage variables
     address private owner = msg.sender;
@@ -35,6 +35,8 @@ contract BetFactory is KeeperCompatible {
         bets.push(_bet);
         betsMap[numberOfBets] = _bet;
         numberOfBets++;
+
+        emit LogBetCreatedFromFactory(_symbol, _line, _spread);
     }
 
     /// @return Returns all outstanding bets.

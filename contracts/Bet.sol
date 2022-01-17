@@ -42,7 +42,7 @@ contract Bet {
     constructor(string memory _symbol, int _line, int _spread, int _maxBetSize, int _multiplier, uint _expiration) {
         symbol = _symbol;
         line = _line * 10**18;
-        spread = _spread * 10*18;
+        spread = _spread * 10**18;
         maxBetSize = _maxBetSize * 10**18;
         payoutMultiplier = _multiplier;
         expiration = _expiration;

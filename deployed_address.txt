@@ -1,0 +1,2 @@
+Deployed address: (BetFactory, Bet varies with use)
+Network: Kovan (42)

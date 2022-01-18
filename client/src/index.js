@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import { ThirdwebWeb3Provider } from '@3rdweb/hooks';
 
-const supportedChainIds = [42];
+const supportedChainIds = [42, 1642460893798];
 
 const connectors = {
   injected: {},

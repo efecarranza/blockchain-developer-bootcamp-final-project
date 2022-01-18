@@ -15,5 +15,12 @@ Compared to most common Truffle projects, this one utilizes `ethers.js` which I 
 
 Ethereum Public Address: `0x59a340f6B6342434196513BEd190dc849541e10A`
 
+# INSTALATTION
 
-
+1. From root of directory `npm i`
+2. Run `truffle compile` to compile the contracts.
+3. Run `ganache-cli` to start a local blockchain (port 8545).
+4. From `client/` folder `npm i`
+5. Run `npm run start` and front-end will show up on `localhost:3000`.
+6. Set up MetaMask to work with localhost.
+7. (Optional) Run `truffle test` from the root directory to run tests.

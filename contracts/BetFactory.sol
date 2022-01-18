@@ -47,7 +47,7 @@ contract BetFactory is KeeperCompatible {
     /// @notice Returns a specific bet's details.
     /// @param index The ID of the bet.
     /// @return Array containing: symbol, line, spread and expiration of bet.
-    function getBetDetails(uint index) public view returns (string memory, int, int, uint) {
+    function getBetDetails(uint index) public view returns (string memory, int, int, uint, address) {
         Bet bet = betsMap[index];
         return bet.getBetDetails();
     }

@@ -48,7 +48,7 @@ contract Bet {
         expiration = _expiration;
         priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
         // Rinkeby: 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
-        // Kovan:0x9326BFA02ADD2366b30bacB125260Af641031331
+        // Kovan: 0x9326BFA02ADD2366b30bacB125260Af641031331
     }
 
     /// @notice Cancel an existing bet.
@@ -103,8 +103,8 @@ contract Bet {
 
     /// @notice Returns bet's details.
     /// @return Array containing: symbol, line, spread and expiration of bet.
-    function getBetDetails() public view returns (string memory, int, int, uint) {
-        return (symbol, line, spread, expiration);
+    function getBetDetails() public view returns (string memory, int, int, uint, address) {
+        return (symbol, line, spread, expiration, address(this));
     }
 
     /// @notice Utility method to return the enum value for side of bet taken.

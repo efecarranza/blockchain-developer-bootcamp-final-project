@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Button, Modal, Form, Input, Message } from 'semantic-ui-react';
+import { Button, Modal, Form, Input, Message, Dropdown } from 'semantic-ui-react';
 import { useWeb3 } from "@3rdweb/hooks";
 import { ThirdwebSDK } from "@3rdweb/sdk";
 import { UnsupportedChainIdError } from "@web3-react/core";
@@ -17,8 +17,25 @@ const Home = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [addressToBet, setAddressToBet] = useState('');
+  const [overUnder, setOverUnder] = useState('over');
+  const [valueToBet, setValueToBet] = useState(0);
 
-  const contractAddress = "0x11E3ce35E7Da7B135874bFAD00491160880BBa06";
+  const overUnderOptions = [
+    {
+      key: 'over',
+      text: 'Over',
+      value: 'over',
+    },
+    {
+      key: 'under',
+      text: 'Under',
+      value: 'under',
+    },
+  ];
+
+  // const contractAddress = "0x11E3ce35E7Da7B135874bFAD00491160880BBa06";
+  const contractAddress = "0xB1449312bB23Aa518C9Bdab6e6C4379B0290e3cE";
   let betFactoryContract;
 
   if (signer) {
@@ -27,6 +44,14 @@ const Home = () => {
       BetFactoryContract.abi,
       signer
     );
+  }
+
+  const onInputValueChange = (e, data) => {
+    setValueToBet(data.value);
+  }
+
+  const onChange = (e, data) => {
+    setOverUnder(data.value);
   }
 
   const formatDate = (date) => {
@@ -43,18 +68,31 @@ const Home = () => {
     setBets(betDetails);
   }, [provider, betFactoryContract]);
 
-  const placeBet = () => {
+  const placeBet = async () => {
     try { 
-      console.log('place bet');
+      setLoading(true);
+      const betContract = new ethers.Contract(
+        addressToBet,
+        BetContract.abi,
+        signer
+      );
+
+      const overrides = {
+        value: ethers.utils.parseEther(valueToBet),
+      }
+
+      await betContract.placeBet(overUnder, overrides);
+      setLoading(false);
     } catch (e) {
-      console.log(e.message);
+      setErrorMessage(e.message);
+      setLoading(false);
     }
   };
 
-  const viewBet = () => {
+  const viewBet = (address) => {
+    setAddressToBet(address);
     setErrorMessage('');
     setOpen(true);
-    console.log(open);
   };
 
   useEffect(() => {
@@ -63,13 +101,6 @@ const Home = () => {
     }
 
     getBets();
-  }, [provider]);
-
-  useMemo(() => {
-    if (!signer) {
-      return;
-    }
-
   }, [provider]);
 
   if (error instanceof UnsupportedChainIdError ) {
@@ -122,7 +153,7 @@ const Home = () => {
                         <td>50</td>
                         <td>{formatDate(bet[3].toString())}</td>
                         <td>
-                        <button className="room-item" value={bet} onClick={() => viewBet()}>
+                        <button className="room-item" value={bet} onClick={() => viewBet(bet[4])}>
                           Bet
                         </button>
                         </td>
@@ -146,11 +177,20 @@ const Home = () => {
           <Form.Field>
             <label>Place Bet For</label>
             <Input
-                disabled={true}
                 label="eth"
                 labelPosition="right"
-                value=""
+                value={valueToBet}
+                onChange={event => setValueToBet(event.target.value)}
             />
+            </Form.Field>
+            <Form.Field>
+              <Dropdown
+                placeholder='Select Over/Under'
+                fluid
+                selection
+                onChange={onChange}
+                options={overUnderOptions}
+              />
             </Form.Field>
             <Message error header="Oops!" content={errorMessage} />
           </Form>

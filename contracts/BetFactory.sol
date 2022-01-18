@@ -67,6 +67,16 @@ contract BetFactory is KeeperCompatible {
         }
     }
 
+    /// @notice Resolves a bet by ID
+    /// @dev Used to resolve a bet and bypass the Chainlink Keeper
+    function resolveBet(uint index) public {
+        Bet currentBet = bets[index];
+        removeFromBets(index);
+        numberOfBets--;
+        (bool success, ) = address(currentBet).call(abi.encodeWithSignature("resolveBet()"));
+        require(success, "It failed to resolve bet.");
+    }
+
     /// @notice Chainlink function to check if outside data should make it into the contract.
     /// @dev Currently not working.
     function checkUpkeep(

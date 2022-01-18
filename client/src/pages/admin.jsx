@@ -50,10 +50,20 @@ const Admin = () => {
   }
 
   const createBet = async () => {
-    console.log(security);
     try {
       setLoading(true);
       await betFactoryContract.createBet(security, line, spread, maxBetSize, multiplier, expiration);
+      setLoading(false);
+    } catch (e) {
+      setErrorMessage(e.message);
+      setLoading(false);
+    }
+  };
+
+  const resolveBet = async () => {
+    try {
+      setLoading(true);
+      await betFactoryContract.resolveBet();
       setLoading(false);
     } catch (e) {
       setErrorMessage(e.message);
@@ -69,7 +79,7 @@ const Admin = () => {
     const allBets = await betFactoryContract.getAllBets();
     const betDetails = await Promise.all(
       allBets.map((element, index) => {
-          return betFactoryContract.getBetDetails(index);
+        return betFactoryContract.getBetDetails(index);
       })
     );
     setBets(betDetails);
@@ -124,6 +134,7 @@ const Admin = () => {
                     <th>Line</th>
                     <th>Spread</th>
                     <th>Expiration</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -134,6 +145,9 @@ const Admin = () => {
                         <td>{ethers.utils.formatEther(bet[1].toString())}</td>
                         <td>50</td>
                         <td>{formatDate(bet[3].toString())}</td>
+                        <td><button className="room-item" value={i} onClick={() => resolveBet(i)}>
+                          Resolve Bet
+                        </button></td>
                       </tr>
                     );
                   })}

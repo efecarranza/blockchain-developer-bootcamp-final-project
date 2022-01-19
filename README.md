@@ -28,3 +28,11 @@ Ethereum Public Address: `0x59a340f6B6342434196513BEd190dc849541e10A`
 There's a "hidden" `/admin` site to create bets and resolve them, in the real world, it wouldn't work like this but to make it easy to test, I've added it to the main site.
 
 There's also a registered Upkeep: `https://keepers.chain.link/kovan/2198` which checks whether there are outstanding bets and whether there's a need to perform an upkeep and automatically resolve bets.
+
+# Live Site
+
+sportsbetx.netlify.app
+
+# Loom Walkthrough
+
+https://www.loom.com/share/77b99884c8d844f2950f1852ea803824

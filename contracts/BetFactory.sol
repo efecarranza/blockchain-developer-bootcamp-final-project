@@ -58,7 +58,8 @@ contract BetFactory is KeeperCompatible {
         for (uint8 _i = 0; _i < _betsLength; _i++) {
             Bet currentBet = bets[_i];
             if (block.timestamp > currentBet.expiration()) {
-                currentBet.resolveBet();
+                (bool success, ) = address(currentBet).call(abi.encodeWithSignature("resolveBet()"));
+                require(success, "It failed to resolve bet.");
                 removeFromBets(_i);
                 numberOfBets--;
                 _betsLength--;
@@ -82,7 +83,7 @@ contract BetFactory is KeeperCompatible {
     function checkUpkeep(
         bytes calldata /*checkData */
     ) external override view returns (bool upkeepNeeded, bytes memory) {
-        return (bets.length > 0, bytes(''));
+        upkeepNeeded = bets.length > 0;
     }
 
     /// @notice Method to run if Chainlink determines the contract needs to perform an action.

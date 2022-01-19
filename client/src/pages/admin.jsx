@@ -30,7 +30,7 @@ const Admin = () => {
     }
   ];
 
-  const contractAddress = "0xB1449312bB23Aa518C9Bdab6e6C4379B0290e3cE";
+  const contractAddress = "0x7f17d4e3353d397D29717D255083558447c9D9Bc";
   let betFactoryContract;
 
   if (signer) {
@@ -60,15 +60,15 @@ const Admin = () => {
     }
   };
 
-  const resolveBet = async () => {
+  const resolveBet = async (i) => {
     try {
       setLoading(true);
-      await betFactoryContract.resolveBet();
-      setLoading(false);
+      await betFactoryContract.resolveBet(i);
     } catch (e) {
       setErrorMessage(e.message);
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const formatDate = (date) => {

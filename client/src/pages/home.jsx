@@ -35,7 +35,7 @@ const Home = () => {
   ];
 
   // const contractAddress = "0x11E3ce35E7Da7B135874bFAD00491160880BBa06";
-  const contractAddress = "0xB1449312bB23Aa518C9Bdab6e6C4379B0290e3cE";
+  const contractAddress = "0x7f17d4e3353d397D29717D255083558447c9D9Bc";
   let betFactoryContract;
 
   if (signer) {
